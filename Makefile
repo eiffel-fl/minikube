@@ -308,7 +308,20 @@ linux-menuconfig:  ## Configure Linux kernel configuration
 	$(MAKE) -C $(BUILD_DIR)/buildroot/output/build/linux-$(KERNEL_VERSION)/ savedefconfig
 	cp $(BUILD_DIR)/buildroot/output/build/linux-$(KERNEL_VERSION)/defconfig deploy/iso/minikube-iso/board/coreos/minikube/linux_defconfig
 
-out/minikube.iso: $(shell find "deploy/iso/minikube-iso" -type f)
+latest-dockerd:
+	# We cannot build dockerd with moby from buildroot-image because moby uses
+	# buildkit which uses container to build things.
+	# So, we would end up doing docker in docker, which is hard to do.
+	# We will first get dockerd, copy it to rootfs-overlay, then we will
+	# build everything from inside the buildroot-image container.
+ifeq ($(IN_DOCKER),0)
+	git clone https://github.com/moby/moby || test $$? -eq 128
+	cd moby && git checkout c1c973e81b0ff36c697fbeabeb5ea7d09566ddc0
+	export VERSION=20.10.9 && make -C moby binary && make -C moby clean
+	cp moby/bundles/binary-daemon/dockerd deploy/iso/minikube-iso/board/coreos/minikube/rootfs-overlay/usr/bin/
+endif
+
+out/minikube.iso: $(shell find "deploy/iso/minikube-iso" -type f) latest-dockerd
 ifeq ($(IN_DOCKER),1)
 	$(MAKE) minikube_iso
 else

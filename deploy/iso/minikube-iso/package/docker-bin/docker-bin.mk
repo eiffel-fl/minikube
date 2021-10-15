@@ -23,9 +23,9 @@ define DOCKER_BIN_INSTALL_TARGET_CMDS
 
 	# As of 2019-05, we use upstream ctr so that we may update it independently of docker.
 
-	$(INSTALL) -D -m 0755 \
-		$(@D)/dockerd \
-		$(TARGET_DIR)/bin/dockerd
+# 	$(INSTALL) -D -m 0755 \
+# 		$(@D)/dockerd \
+# 		$(TARGET_DIR)/bin/dockerd
 
 	$(INSTALL) -D -m 0755 \
 		$(@D)/docker-init \

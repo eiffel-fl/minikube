@@ -21,16 +21,20 @@ spec:
         # (For reference, see: https://github.com/inspektor-gadget/inspektor-gadget/runs/3966318270?check_suite_focus=true#step:20:221)
         container.apparmor.security.beta.kubernetes.io/gadget: "unconfined"
         inspektor-gadget.kinvolk.io/option-hook-mode: "auto"
+        # keep aligned with values in pkg/operators/prometheus/prometheus.go
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2223"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccount: gadget
       hostPID: true
-      hostNetwork: true
+      hostNetwork: false
       nodeSelector:
         kubernetes.io/os: "linux"
       containers:
       - name: gadget
         terminationMessagePolicy: FallbackToLogsOnError
-        image: {{.CustomRegistries.InspektorGadget  | default .ImageRepository | default .Registries.InspektorGadget }}{{.Images.InspektorGadget}}
+        image: "ghcr.io/inspektor-gadget/inspektor-gadget:v0.17.0"
         imagePullPolicy: "Always"
         command: [ "/entrypoint.sh" ]
         lifecycle:
@@ -76,7 +80,7 @@ spec:
           - name: GADGET_IMAGE
             value: "ghcr.io/inspektor-gadget/inspektor-gadget"
           - name: INSPEKTOR_GADGET_VERSION
-            value: "v0.16.1"
+            value: "v0.17.0"
           - name: INSPEKTOR_GADGET_OPTION_HOOK_MODE
             value: "auto"
           - name: INSPEKTOR_GADGET_OPTION_FALLBACK_POD_INFORMER
